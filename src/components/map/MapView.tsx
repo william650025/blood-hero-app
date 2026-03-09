@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import type { BloodStationRow } from '@/lib/actions/stations';
@@ -20,16 +20,17 @@ const defaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = defaultIcon;
 
+// SSR-safe mount detection without useEffect + setState
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 interface MapViewProps {
   stations: BloodStationRow[];
 }
 
 export function MapView({ stations }: MapViewProps) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (!isMounted) {
     return (

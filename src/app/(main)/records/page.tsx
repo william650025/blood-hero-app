@@ -27,17 +27,18 @@ export default function RecordsPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadRecords = async () => {
-    setIsLoading(true);
-    const result = await fetchDonationRecords();
-    if (result.data) {
-      setRecords(result.data);
-    }
-    setIsLoading(false);
-  };
-
   useEffect(() => {
+    let cancelled = false;
+    async function loadRecords() {
+      setIsLoading(true);
+      const result = await fetchDonationRecords();
+      if (!cancelled && result.data) {
+        setRecords(result.data);
+      }
+      if (!cancelled) setIsLoading(false);
+    }
     loadRecords();
+    return () => { cancelled = true; };
   }, []);
 
   const handleDelete = async () => {

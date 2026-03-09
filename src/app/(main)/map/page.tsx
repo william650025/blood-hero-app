@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +54,6 @@ const REGIONS = [
 
 export default function MapPage() {
   const [allStations, setAllStations] = useState<BloodStationRow[]>([]);
-  const [filteredStations, setFilteredStations] = useState<BloodStationRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [selectedRegion, setSelectedRegion] = useState('all');
@@ -69,24 +68,18 @@ export default function MapPage() {
         stations = await getDefaultStations();
       }
       setAllStations(stations);
-      setFilteredStations(stations);
       setIsLoading(false);
     }
     load();
   }, []);
 
-  useEffect(() => {
-    if (selectedRegion === 'all') {
-      setFilteredStations(allStations);
-    } else {
-      setFilteredStations(
-        allStations.filter(
-          (s) =>
-            s.address?.includes(selectedRegion) ||
-            (s as BloodStationRow & { region?: string }).region === selectedRegion
-        )
-      );
-    }
+  const filteredStations = useMemo(() => {
+    if (selectedRegion === 'all') return allStations;
+    return allStations.filter(
+      (s) =>
+        s.address?.includes(selectedRegion) ||
+        (s as BloodStationRow & { region?: string }).region === selectedRegion
+    );
   }, [selectedRegion, allStations]);
 
   return (
