@@ -26,38 +26,12 @@ interface DonationState {
   setLoading: (loading: boolean) => void;
 }
 
-// Mock data
-const mockRecords: DonationRecord[] = [
-  {
-    id: '1',
-    date: '2025-12-15',
-    type: 'whole_250',
-    location: '台北捐血中心',
-    volume: 250,
-  },
-  {
-    id: '2',
-    date: '2025-09-20',
-    type: 'whole_500',
-    location: '新竹捐血站',
-    volume: 500,
-  },
-  {
-    id: '3',
-    date: '2025-06-10',
-    type: 'platelet',
-    location: '台中捐血中心',
-    volume: 250,
-    notes: '分離術捐血',
-  },
-];
-
 export const useDonationStore = create<DonationState>((set) => ({
-  records: mockRecords,
+  records: [],
   stats: {
-    totalCount: mockRecords.length,
-    totalVolume: mockRecords.reduce((sum, r) => sum + r.volume, 0),
-    lastDonation: mockRecords[0],
+    totalCount: 0,
+    totalVolume: 0,
+    lastDonation: null,
   },
   isLoading: false,
   setRecords: (records) =>
