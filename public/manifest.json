@@ -1,17 +1,44 @@
 {
-  "name": "捐血勇士",
-  "short_name": "BloodHero",
+  "name": "捐血勇士 Blood Hero",
+  "short_name": "捐血勇士",
   "description": "記錄你的捐血旅程，成為真正的英雄",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#dc2626",
   "orientation": "portrait",
+  "categories": ["health", "lifestyle"],
+  "lang": "zh-TW",
   "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/favicon.ico",
       "sizes": "64x64",
       "type": "image/x-icon"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "新增捐血紀錄",
+      "url": "/records/new",
+      "description": "快速新增捐血紀錄"
+    },
+    {
+      "name": "捐血地圖",
+      "url": "/map",
+      "description": "查看附近捐血站"
     }
   ]
 }
