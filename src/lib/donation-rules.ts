@@ -52,6 +52,7 @@ export function calculateNextEligibleDate(
 ): Date {
   const intervalDays = getDonationIntervalDays(donationType, gender);
   const nextDate = new Date(donationDate);
+  nextDate.setHours(0, 0, 0, 0);
   nextDate.setDate(nextDate.getDate() + intervalDays);
   return nextDate;
 }
