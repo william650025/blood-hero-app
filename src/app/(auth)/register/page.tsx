@@ -76,7 +76,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const result = await signUp(email, password, displayName);
+      const result = await signUp(email, password, displayName, gender || undefined, bloodType || undefined);
       if (result.error) {
         setError(result.error);
       } else {

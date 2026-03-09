@@ -159,8 +159,13 @@ language plpgsql
 security definer set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, new.raw_user_meta_data ->> 'display_name');
+  insert into public.profiles (id, display_name, gender, blood_type)
+  values (
+    new.id,
+    new.raw_user_meta_data ->> 'display_name',
+    new.raw_user_meta_data ->> 'gender',
+    new.raw_user_meta_data ->> 'blood_type'
+  );
   return new;
 end;
 $$;
@@ -175,6 +180,7 @@ create trigger on_auth_user_created
 create or replace function public.update_updated_at()
 returns trigger
 language plpgsql
+security definer set search_path = ''
 as $$
 begin
   new.updated_at = now();

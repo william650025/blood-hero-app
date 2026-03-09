@@ -3,7 +3,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
-export async function signUp(email: string, password: string, displayName: string) {
+export async function signUp(
+  email: string,
+  password: string,
+  displayName: string,
+  gender?: 'male' | 'female',
+  bloodType?: 'A' | 'B' | 'O' | 'AB'
+) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signUp({
@@ -12,6 +18,8 @@ export async function signUp(email: string, password: string, displayName: strin
     options: {
       data: {
         display_name: displayName,
+        gender: gender || null,
+        blood_type: bloodType || null,
       },
     },
   });
