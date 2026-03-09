@@ -41,10 +41,12 @@ export async function signIn(email: string, password: string) {
 export async function signInWithGoogle() {
   const supabase = await createClient();
 
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/callback`,
+      redirectTo: `${origin}/auth/callback`,
     },
   });
 
@@ -75,13 +77,13 @@ export async function getSession() {
   const supabase = await createClient();
 
   const {
-    data: { session },
+    data: { user },
     error,
-  } = await supabase.auth.getSession();
+  } = await supabase.auth.getUser();
 
   if (error) {
-    return { error: error.message, session: null };
+    return { error: error.message, user: null };
   }
 
-  return { session, error: null };
+  return { user, error: null };
 }

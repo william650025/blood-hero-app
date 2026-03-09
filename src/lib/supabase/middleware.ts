@@ -33,8 +33,17 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes under /(main)/ — redirect to /login if not authenticated
-  if (!user && request.nextUrl.pathname.startsWith('/(main)')) {
+  // Public paths that don't require authentication
+  const publicPaths = ['/login', '/register', '/auth/callback'];
+  const isPublic = publicPaths.some(
+    (path) =>
+      request.nextUrl.pathname === path ||
+      request.nextUrl.pathname.startsWith(path + '/')
+  );
+
+  // Protected routes — redirect to /login if not authenticated
+  // Route groups like (main) don't appear in URLs, so we protect all non-public paths
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

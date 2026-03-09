@@ -1,14 +1,18 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Header } from '@/components/layout/Header';
-import { useDonationStore } from '@/stores/useDonationStore';
+import { fetchDonationStats, type DonationRecordRow } from '@/lib/actions/donations';
+import { fetchProfile } from '@/lib/actions/profile';
 import {
   getDaysUntilEligible,
   DONATION_TYPE_LABELS,
+  type DonationType,
+  type Gender,
 } from '@/lib/donation-rules';
 import {
   Droplets,
@@ -17,27 +21,60 @@ import {
   CalendarDays,
   Heart,
   TrendingUp,
+  Loader2,
 } from 'lucide-react';
 
-// Mock user data (Sprint 2 will use real auth)
-const mockUser = {
-  displayName: '小明',
-  gender: 'male' as const,
-};
-
 export default function DashboardPage() {
-  const { stats } = useDonationStore();
-  const lastDonation = stats.lastDonation;
+  const [displayName, setDisplayName] = useState('');
+  const [gender, setGender] = useState<Gender>('male');
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalVolume, setTotalVolume] = useState(0);
+  const [lastDonation, setLastDonation] = useState<DonationRecordRow | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const [profileResult, statsResult] = await Promise.all([
+        fetchProfile(),
+        fetchDonationStats(),
+      ]);
+
+      if (profileResult.data) {
+        setDisplayName(profileResult.data.display_name || '捐血勇士');
+        setGender((profileResult.data.gender as Gender) || 'male');
+      }
+
+      if (statsResult.data) {
+        setTotalCount(statsResult.data.totalCount);
+        setTotalVolume(statsResult.data.totalVolume);
+        setLastDonation(statsResult.data.lastDonation);
+      }
+
+      setIsLoading(false);
+    }
+    load();
+  }, []);
 
   const daysUntilEligible = lastDonation
     ? getDaysUntilEligible(
-        new Date(lastDonation.date),
-        lastDonation.type,
-        mockUser.gender
+        new Date(lastDonation.donation_date),
+        lastDonation.donation_type as DonationType,
+        gender
       )
     : 0;
 
-  const canDonate = daysUntilEligible === 0;
+  const canDonate = !lastDonation || daysUntilEligible === 0;
+
+  if (isLoading) {
+    return (
+      <div>
+        <Header title="捐血勇士" />
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-400" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -51,7 +88,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              嗨，{mockUser.displayName}
+              嗨，{displayName}
             </h2>
             <p className="text-sm text-muted-foreground">
               感謝你的每一次捐血 ❤️
@@ -62,9 +99,7 @@ export default function DashboardPage() {
         {/* Donation Status Card */}
         <Card
           className={`border-0 ${
-            canDonate
-              ? 'bg-success-bg'
-              : 'bg-primary-50'
+            canDonate ? 'bg-success-bg' : 'bg-primary-50'
           }`}
         >
           <CardContent className="flex items-center gap-4 pt-6">
@@ -114,17 +149,19 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="font-semibold text-foreground">
-                    {lastDonation.date}
+                    {lastDonation.donation_date}
                   </p>
                   <Badge variant="secondary">
-                    {DONATION_TYPE_LABELS[lastDonation.type]}
+                    {DONATION_TYPE_LABELS[lastDonation.donation_type as DonationType]}
                   </Badge>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">
-                    <MapPin className="mr-1 inline h-3.5 w-3.5" />
-                    {lastDonation.location}
-                  </p>
+                  {lastDonation.location_name && (
+                    <p className="text-sm text-muted-foreground">
+                      <MapPin className="mr-1 inline h-3.5 w-3.5" />
+                      {lastDonation.location_name}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -175,13 +212,13 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg bg-primary-50 p-4 text-center">
                 <p className="text-3xl font-extrabold text-primary-600">
-                  {stats.totalCount}
+                  {totalCount}
                 </p>
                 <p className="text-xs text-muted-foreground">捐血次數</p>
               </div>
               <div className="rounded-lg bg-primary-50 p-4 text-center">
                 <p className="text-3xl font-extrabold text-primary-600">
-                  {stats.totalVolume}
+                  {totalVolume}
                 </p>
                 <p className="text-xs text-muted-foreground">總 cc 數</p>
               </div>
